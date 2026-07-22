@@ -1,0 +1,19 @@
+# Data
+data/
+
+# Trained models
+models/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environments
+venv/
+.env
+
+# macOS
+.DS_Store
