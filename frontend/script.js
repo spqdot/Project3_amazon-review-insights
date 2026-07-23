@@ -1,4 +1,4 @@
-const defaultApiBase = "http://localhost:8000";
+const defaultApiBase = "https://project3-amazon-review-insights-1.onrender.com";
 let apiBase = localStorage.getItem("ari-api-base") || defaultApiBase;
 let lastResults = [];
 
