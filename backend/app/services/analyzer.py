@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 from typing import Any
 
@@ -21,43 +22,51 @@ def preload_pipeline() -> None:
 
 
 def _predict(text: str) -> dict[str, Any]:
-
     prompt = f"""
 Analyze the sentiment of the following review.
 
-Respond ONLY in this exact JSON format:
+Return ONLY valid JSON in exactly this format:
 
 {{
-  "label":"POSITIVE",
-  "score":0.98
+    "label": "POSITIVE",
+    "score": 0.98
 }}
 
 Review:
 {text}
 """
 
-    response = client.chat.completions.create(
-        model=settings.openai_model,
-        temperature=0,
-        messages=[
-            {
-                "role": "user",
-                "content": prompt,
-            }
-        ],
-    )
+    try:
+        response = client.chat.completions.create(
+            model=settings.openai_model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a sentiment analysis model. Return only JSON.",
+                },
+                {
+                    "role": "user",
+                    "content": prompt,
+                },
+            ],
+            temperature=0,
+        )
 
-    content = response.choices[0].message.content
+        content = response.choices[0].message.content.strip()
 
-    import json
+        logger.info("OpenAI response: %s", content)
 
-    result = json.loads(content)
+        result = json.loads(content)
 
-    return {
-        "label": result["label"],
-        "score": round(float(result["score"]), 6),
-        "text_snippet": text[:120] if len(text) > 120 else text,
-    }
+        return {
+            "label": result["label"],
+            "score": float(result["score"]),
+            "text_snippet": text[:120],
+        }
+
+    except Exception:
+        logger.exception("OpenAI sentiment request failed")
+        raise
 
 
 def analyze_text(text: str) -> dict[str, Any]:
@@ -65,7 +74,6 @@ def analyze_text(text: str) -> dict[str, Any]:
 
 
 def analyze_batch(texts: list[str]) -> list[dict[str, Any]]:
-
     if len(texts) > settings.max_batch_size:
         raise ValueError(
             f"Batch size {len(texts)} exceeds maximum of {settings.max_batch_size}"
