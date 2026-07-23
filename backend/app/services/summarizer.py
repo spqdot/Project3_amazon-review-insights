@@ -59,7 +59,10 @@ def _openai_summary(texts: list[str], max_sentences: int = 3) -> str:
         max_tokens=settings.openai_max_tokens,
         temperature=0.3,
     )
-    return response.choices[0].message.content.strip()
+    content = response.choices[0].message.content
+    if content is None:
+        raise RuntimeError("OpenAI returned an empty response (content was None)")
+    return content.strip()
 
 
 # ---------------------------------------------------------------------------

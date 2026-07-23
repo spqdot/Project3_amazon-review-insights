@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-3.5-turbo"
     openai_max_tokens: int = 256
 
+    # CORS — comma-separated list of allowed origins.
+    # Use "*" only for development; restrict to specific domains in production.
+    cors_origins: str = "*"
+
     # App settings
     app_name: str = "Amazon Review Insights API"
     app_version: str = "1.0.0"
