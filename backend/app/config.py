@@ -6,17 +6,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Application configuration loaded from environment variables or .env file."""
-
     model_config = SettingsConfigDict(
         env_file=os.path.join(os.path.dirname(__file__), "..", ".env"),
         env_file_encoding="utf-8",
         extra="ignore",
     )
-
-    # Hugging Face
-    hf_token: str = ""
-    model_name: str = "distilbert-base-uncased-finetuned-sst-2-english"
 
     # Sentiment settings
     max_batch_size: int = 32
@@ -24,7 +18,7 @@ class Settings(BaseSettings):
 
     # OpenAI
     openai_api_key: str = ""
-    openai_model: str = "gpt-3.5-turbo"
+    openai_model: str = "gpt-4o-mini"
     openai_max_tokens: int = 256
     openai_max_reviews: int = 50
 

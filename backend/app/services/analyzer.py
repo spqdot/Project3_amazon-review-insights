@@ -3,19 +3,13 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import requests
+from openai import OpenAI
 
 from ..config import settings
 
 logger = logging.getLogger(__name__)
 
-API_URL = (
-    f"https://api-inference.huggingface.co/models/{settings.model_name}"
-)
-
-HEADERS = {
-    "Authorization": f"Bearer {settings.hf_token}"
-}
+client = OpenAI(api_key=settings.openai_api_key)
 
 
 def is_model_loaded() -> bool:
@@ -23,31 +17,45 @@ def is_model_loaded() -> bool:
 
 
 def preload_pipeline() -> None:
-    logger.info("Using Hugging Face Inference API.")
+    logger.info("Using OpenAI for sentiment analysis.")
 
 
 def _predict(text: str) -> dict[str, Any]:
-    response = requests.post(
-        API_URL,
-        headers=HEADERS,
-        json={"inputs": text},
-        timeout=60,
+
+    prompt = f"""
+Analyze the sentiment of the following review.
+
+Respond ONLY in this exact JSON format:
+
+{{
+  "label":"POSITIVE",
+  "score":0.98
+}}
+
+Review:
+{text}
+"""
+
+    response = client.chat.completions.create(
+        model=settings.openai_model,
+        temperature=0,
+        messages=[
+            {
+                "role": "user",
+                "content": prompt,
+            }
+        ],
     )
 
-    response.raise_for_status()
+    content = response.choices[0].message.content
 
-    result = response.json()
+    import json
 
-    # Handle nested response format
-    if isinstance(result, list) and len(result) > 0:
-        if isinstance(result[0], list):
-            result = result[0]
-
-    best = max(result, key=lambda x: x["score"])
+    result = json.loads(content)
 
     return {
-        "label": best["label"],
-        "score": round(float(best["score"]), 6),
+        "label": result["label"],
+        "score": round(float(result["score"]), 6),
         "text_snippet": text[:120] if len(text) > 120 else text,
     }
 
@@ -57,6 +65,7 @@ def analyze_text(text: str) -> dict[str, Any]:
 
 
 def analyze_batch(texts: list[str]) -> list[dict[str, Any]]:
+
     if len(texts) > settings.max_batch_size:
         raise ValueError(
             f"Batch size {len(texts)} exceeds maximum of {settings.max_batch_size}"
