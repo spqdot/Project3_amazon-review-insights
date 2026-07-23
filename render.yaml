@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: amazon-review-insights-api
+    runtime: docker
+    # Build context is the backend/ directory
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
+    # Render injects PORT automatically; the Dockerfile CMD reads it.
+    envVars:
+      - key: MODEL_NAME
+        value: distilbert-base-uncased-finetuned-sst-2-english
+      - key: MAX_BATCH_SIZE
+        value: "32"
+      - key: MAX_TEXT_LENGTH
+        value: "512"
+      - key: DEBUG
+        value: "false"
+      - key: CORS_ORIGINS
+        value: "*"
+      # Set OPENAI_API_KEY in the Render dashboard (do NOT hard-code it here).
+      # - key: OPENAI_API_KEY
+      #   sync: false
+    healthCheckPath: /health
+    autoDeploy: true
