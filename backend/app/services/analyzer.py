@@ -3,34 +3,58 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from transformers import pipeline
+import requests
 
 from ..config import settings
 
 logger = logging.getLogger(__name__)
 
-classifier = pipeline(
-    "sentiment-analysis",
-    model=settings.model_name,
-    framework="pt",
+API_URL = (
+    f"https://api-inference.huggingface.co/models/{settings.model_name}"
 )
 
+HEADERS = {
+    "Authorization": f"Bearer {settings.hf_token}"
+}
+
+
 def is_model_loaded() -> bool:
-    return classifier is not None
+    return True
+
 
 def preload_pipeline() -> None:
-    logger.info("Loading sentiment model...")
-    classifier("Model warmup")
-    logger.info("Model loaded.")
+    logger.info("Using Hugging Face Inference API.")
 
-def analyze_text(text: str) -> dict[str, Any]:
-    result = classifier(text)[0]
+
+def _predict(text: str) -> dict[str, Any]:
+    response = requests.post(
+        API_URL,
+        headers=HEADERS,
+        json={"inputs": text},
+        timeout=60,
+    )
+
+    response.raise_for_status()
+
+    result = response.json()
+
+    # Handle nested response format
+    if isinstance(result, list) and len(result) > 0:
+        if isinstance(result[0], list):
+            result = result[0]
+
+    best = max(result, key=lambda x: x["score"])
 
     return {
-        "label": result["label"],
-        "score": round(float(result["score"]), 6),
+        "label": best["label"],
+        "score": round(float(best["score"]), 6),
         "text_snippet": text[:120] if len(text) > 120 else text,
     }
+
+
+def analyze_text(text: str) -> dict[str, Any]:
+    return _predict(text)
+
 
 def analyze_batch(texts: list[str]) -> list[dict[str, Any]]:
     if len(texts) > settings.max_batch_size:
@@ -38,16 +62,4 @@ def analyze_batch(texts: list[str]) -> list[dict[str, Any]]:
             f"Batch size {len(texts)} exceeds maximum of {settings.max_batch_size}"
         )
 
-    results = classifier(texts)
-
-    output = []
-    for text, result in zip(texts, results):
-        output.append(
-            {
-                "label": result["label"],
-                "score": round(float(result["score"]), 6),
-                "text_snippet": text[:120] if len(text) > 120 else text,
-            }
-        )
-
-    return output
+    return [_predict(text) for text in texts]
