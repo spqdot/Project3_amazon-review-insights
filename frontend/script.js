@@ -97,7 +97,7 @@ async function checkHealth() {
   try {
     const health = await request("/health");
     els.healthStatus.classList.add("online");
-    els.healthText.textContent = health.model_loaded ? "Model ready" : "API online";
+    els.healthText.textContent = health.model_loaded ? "AI ready" : "API online";
   } catch {
     els.healthStatus.classList.add("offline");
     els.healthText.textContent = "API offline";
