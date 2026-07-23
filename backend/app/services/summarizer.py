@@ -46,7 +46,7 @@ def _openai_summary(texts: list[str], max_sentences: int = 3) -> str:
         raise RuntimeError("openai package is not installed") from exc
 
     client = OpenAI(api_key=settings.openai_api_key)
-    joined = "\n---\n".join(texts[:50])  # cap at 50 reviews to stay within token limits
+    joined = "\n---\n".join(texts[: settings.openai_max_reviews])  # cap to stay within token limits
     prompt = (
         f"You are a helpful assistant. Summarize the following Amazon product reviews "
         f"in {max_sentences} concise sentences, highlighting the most common sentiments "

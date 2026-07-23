@@ -88,7 +88,7 @@ def analyze_batch(texts: list[str]) -> list[dict[str, Any]]:
         texts,
         truncation=True,
         max_length=settings.max_text_length,
-        batch_size=min(len(texts), 8),
+        batch_size=min(len(texts), settings.pipeline_batch_size),
     )
     return [
         {

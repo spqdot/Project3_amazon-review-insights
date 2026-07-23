@@ -54,9 +54,32 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+def _parse_cors_origins(raw: str) -> list[str]:
+    """
+    Parse a comma-separated CORS origins string.
+
+    Each token must be either the wildcard ``*`` or a URL starting with
+    ``http://`` or ``https://``.  Invalid tokens are logged and skipped;
+    if nothing valid remains the function falls back to ``["*"]``.
+    """
+    valid: list[str] = []
+    for token in raw.split(","):
+        origin = token.strip()
+        if not origin:
+            continue
+        if origin == "*" or origin.startswith(("http://", "https://")):
+            valid.append(origin)
+        else:
+            logger.warning("Ignoring invalid CORS origin: %r", origin)
+    if not valid:
+        logger.warning("No valid CORS origins found; falling back to '*'")
+        return ["*"]
+    return valid
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[o.strip() for o in settings.cors_origins.split(",")],
+    allow_origins=_parse_cors_origins(settings.cors_origins),
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )

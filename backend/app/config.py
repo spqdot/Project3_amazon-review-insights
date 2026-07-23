@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     model_name: str = "distilbert-base-uncased-finetuned-sst-2-english"
     max_batch_size: int = 32
     max_text_length: int = 512
+    # Internal batch size passed to the HuggingFace pipeline (tune for your hardware)
+    pipeline_batch_size: int = 8
+    # Maximum number of reviews sent to OpenAI for summarization (token-limit guard)
+    openai_max_reviews: int = 50
 
     # Optional GenAI settings
     openai_api_key: str = ""
