@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Amazon Review Insights</title>
+    <meta
+      name="description"
+      content="Sentiment analysis and review summarization dashboard for Amazon product reviews."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Amazon Review Insights home">
+          <span class="brand-mark">ARI</span>
+          <span>
+            <strong>Amazon Review Insights</strong>
+            <small>NLP sentiment dashboard</small>
+          </span>
+        </a>
+
+        <div class="api-controls">
+          <span class="status-pill" id="healthStatus">
+            <span class="status-dot"></span>
+            <span id="healthText">Checking API</span>
+          </span>
+          <button class="icon-button" id="settingsButton" type="button" aria-label="API settings" title="API settings">
+            <span aria-hidden="true">API</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="hero-band">
+          <div class="hero-copy">
+            <p class="eyebrow">Review intelligence</p>
+            <h1>Turn customer reviews into clear product signals.</h1>
+            <p>
+              Analyze sentiment, compare batches, and summarize recurring customer feedback from one focused workspace.
+            </p>
+          </div>
+
+          <div class="signal-board" aria-label="Review analytics preview">
+            <div class="signal-card positive">
+              <span>Positive</span>
+              <strong id="positiveMetric">0</strong>
+            </div>
+            <div class="signal-card negative">
+              <span>Negative</span>
+              <strong id="negativeMetric">0</strong>
+            </div>
+            <div class="signal-card confidence">
+              <span>Avg confidence</span>
+              <strong id="confidenceMetric">--</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="tool-grid">
+          <div class="analysis-panel">
+            <div class="tabs" role="tablist" aria-label="Analysis mode">
+              <button class="tab-button active" type="button" data-tab="single" role="tab" aria-selected="true">
+                Analyze
+              </button>
+              <button class="tab-button" type="button" data-tab="batch" role="tab" aria-selected="false">
+                Batch
+              </button>
+              <button class="tab-button" type="button" data-tab="summary" role="tab" aria-selected="false">
+                Summary
+              </button>
+            </div>
+
+            <div class="tab-panel active" id="singlePanel" role="tabpanel">
+              <div class="field-row">
+                <label for="singleReview">Review text</label>
+                <span id="singleCount">0 / 5000</span>
+              </div>
+              <textarea
+                id="singleReview"
+                maxlength="5000"
+                placeholder="The headphones arrived quickly and the sound quality is excellent, but the case feels fragile."
+              ></textarea>
+              <div class="sample-row" aria-label="Sample reviews">
+                <button class="ghost-button" type="button" data-sample="positive">Positive sample</button>
+                <button class="ghost-button" type="button" data-sample="mixed">Mixed sample</button>
+                <button class="ghost-button" type="button" data-sample="negative">Negative sample</button>
+              </div>
+              <button class="primary-button" id="analyzeButton" type="button">Analyze sentiment</button>
+            </div>
+
+            <div class="tab-panel" id="batchPanel" role="tabpanel" hidden>
+              <div class="field-row">
+                <label for="batchReviews">Batch reviews</label>
+                <span id="batchCount">0 / 32</span>
+              </div>
+              <textarea
+                id="batchReviews"
+                placeholder="Great battery life and easy setup.
+Packaging was damaged and support took too long.
+Comfortable fit, clean sound, and fair price."
+              ></textarea>
+              <button class="primary-button" id="batchButton" type="button">Analyze batch</button>
+            </div>
+
+            <div class="tab-panel" id="summaryPanel" role="tabpanel" hidden>
+              <div class="field-row">
+                <label for="summaryReviews">Reviews to summarize</label>
+                <span id="summaryCount">0 / 100</span>
+              </div>
+              <textarea
+                id="summaryReviews"
+                placeholder="Customers like the battery life and simple setup. Several reviews mention weak packaging. A few buyers report delayed support responses."
+              ></textarea>
+              <div class="range-row">
+                <label for="sentenceCount">Sentences</label>
+                <input id="sentenceCount" type="range" min="1" max="10" value="3" />
+                <output id="sentenceOutput" for="sentenceCount">3</output>
+              </div>
+              <button class="primary-button" id="summaryButton" type="button">Generate summary</button>
+            </div>
+          </div>
+
+          <aside class="results-panel" aria-live="polite">
+            <div class="panel-heading">
+              <span>Live output</span>
+              <button class="ghost-button compact" id="clearButton" type="button">Clear</button>
+            </div>
+
+            <div class="empty-state" id="emptyState">
+              <div class="sparkline" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
+              <h2>No results yet</h2>
+              <p>Your analysis results will appear here.</p>
+            </div>
+
+            <div class="result-stack" id="resultStack" hidden></div>
+          </aside>
+        </section>
+      </main>
+    </div>
+
+    <dialog class="settings-dialog" id="settingsDialog">
+      <form method="dialog">
+        <div class="dialog-heading">
+          <h2>API settings</h2>
+          <button class="icon-button" value="cancel" aria-label="Close settings" title="Close settings" type="submit">
+            <span aria-hidden="true">X</span>
+          </button>
+        </div>
+        <label for="apiBaseUrl">Backend URL</label>
+        <input id="apiBaseUrl" type="url" placeholder="https://your-backend.onrender.com" />
+        <menu>
+          <button class="ghost-button" value="cancel" type="submit">Cancel</button>
+          <button class="primary-button compact" id="saveSettings" value="default" type="submit">Save</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="script.js"></script>
+  </body>
+</html>
