@@ -134,6 +134,7 @@ Request:
   "texts": [
     "Great battery life and easy setup.",
     "I like the design and performance, although the software is a bit buggy and setup was confusing.",
+    "The package arrived yesterday. I haven't used the product enough to form an opinion yet.",
     "Packaging was damaged and customer support was slow."
   ]
 }
@@ -155,12 +156,17 @@ Response:
       "text_snippet": "I like the design and performance, although the software is a bit buggy and setup was confusing."
     },
     {
+      "label": "NEUTRAL",
+      "score": 0.82,
+      "text_snippet": "The package arrived yesterday. I haven't used the product enough to form an opinion yet."
+    },
+    {
       "label": "NEGATIVE",
       "score": 0.94,
       "text_snippet": "Packaging was damaged and customer support was slow."
     }
   ],
-  "total": 3
+  "total": 4
 }
 ```
 
