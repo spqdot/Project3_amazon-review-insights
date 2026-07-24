@@ -20,6 +20,12 @@ The project was built as an end-to-end data product: exploratory notebooks and m
 - Configure the deployed backend URL directly from the frontend `API` button.
 - Deploy the frontend as a static Vercel app.
 
+## Example Review
+
+```text
+I like the design and performance, although the software is a bit buggy and setup was confusing.
+```
+
 ## Tech Stack
 
 Frontend:
@@ -127,6 +133,7 @@ Request:
 {
   "texts": [
     "Great battery life and easy setup.",
+    "I like the design and performance, although the software is a bit buggy and setup was confusing.",
     "Packaging was damaged and customer support was slow."
   ]
 }
@@ -143,12 +150,17 @@ Response:
       "text_snippet": "Great battery life and easy setup."
     },
     {
+      "label": "NEUTRAL",
+      "score": 0.86,
+      "text_snippet": "I like the design and performance, although the software is a bit buggy and setup was confusing."
+    },
+    {
       "label": "NEGATIVE",
       "score": 0.94,
       "text_snippet": "Packaging was damaged and customer support was slow."
     }
   ],
-  "total": 2
+  "total": 3
 }
 ```
 
